@@ -9,22 +9,22 @@
 		AT_FDCWD = -100
 
 pn:		.string "output.bin"
-fmt1: 	.string "Error opening file: %s\nAborting.\n"
-fmt2: 	.string "long int = %ld\n"
+fmt1: 		.string "Error opening file: %s\nAborting.\n"
+fmt2: 		.string "long int = %ld\n"
 
 		.balign 4
 		.global main 
-main: 	stp 	x29, x30, [sp, alloc]!
+main: 		stp 	x29, x30, [sp, alloc]!
 		mov 	x29, sp
 
-		mov		w0, AT_FDCWD 			// 1st arg (dirfd, -100 means current working directory)
-		adrp 	x1, pn 					// 2nd arg (pathname, "output.bin")
+		mov	w0, AT_FDCWD 			// 1st arg (dirfd, -100 means current working directory)
+		adrp 	x1, pn 				// 2nd arg (pathname, "output.bin")
 		add 	x1, x1, :lo12:pn 		
-		mov 	w2, 0 					// 3rd arg (flag, read-only)
-		mov		w3, 0 					// 4th arg (not used)
-		mov 	x8, 56 					// openat I/O request
-		svc 	0 						// call system function
-		mov		fd_r, w0 				// Record file descriptor
+		mov 	w2, 0 				// 3rd arg (flag, read-only)
+		mov	w3, 0 				// 4th arg (not used)
+		mov 	x8, 56 				// openat I/O request
+		svc 	0 				// call system function
+		mov	fd_r, w0 			// Record file descriptor
 
 		// error check
 		cmp 	fd_r, 0
@@ -34,18 +34,18 @@ main: 	stp 	x29, x30, [sp, alloc]!
 		add 	x0, x0, :lo12:fmt1
 		adrp 	x1, pn
 		add  	x1, x1, :lo12:pn
-		bl 		printf
+		bl 	printf
 		mov 	w0, -1
-		b 		exit
+		b 	exit
 
-openok: add 	buf_base_r, x29, buf_s
+openok: 	add 	buf_base_r, x29, buf_s
 
 		// read long ints from binary file one buffer at a time in a loop
-top:	mov 	w0, fd_r 				// 1st arg (fd)
+top:		mov 	w0, fd_r 			// 1st arg (fd)
 		mov 	x1, buf_base_r 			// 2nd arg (buf)
 		mov 	w2, buf_size 			// 3rd arg (n)
-		mov 	x8, 63 					// read I/O request
-		svc		0 						// call system function
+		mov 	x8, 63 				// read I/O request
+		svc	0 				// call system function
 		mov 	nread_r, x0 			// record # of bytes actually read
 
 		cmp 	nread_r, buf_size
@@ -57,13 +57,13 @@ top:	mov 	w0, fd_r 				// 1st arg (fd)
 		ldr 	x1, [buf_base_r]
 		bl  	printf
 
-		b top
+		b 	top
 
 		// close the binary file
-end: 	mov 	w0, fd_r
-		mov		x8, 57
+end: 		mov 	w0, fd_r
+		mov	x8, 57
 		svc 	0
 
 		mov 	w0, 0
-exit:	ldp 	x29, x30, [sp], dealloc
+exit:		ldp 	x29, x30, [sp], dealloc
 		ret
